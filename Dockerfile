@@ -1,7 +1,11 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 # COPY files
+<<<<<<< HEAD
 COPY package*.json ./
+=======
+COPY package*.json .
+>>>>>>> 0ce31e71e0d22e450bf82315efb41ad4dcfc7f7d
 # Install deps
 RUN npm install
 # COPY rest
