@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout(scm)
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'npm install'
+                sh 'npm run build'
+            }
+        }
+        stage('Deploy to S3') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('aws-jenkins-access-key')
+                AWS_SECRET_ACCESS_KEY = credentials('aws-jenkins-secret')
+                AWS_DEFAULT_REGION = 'us-east-1'
+            }
+            steps {
+                sh 'aws s3 sync build/ s3://my-react-app-bucket --delete'
+            }
+        }
+        stage('Invalid CloudFront Cache') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('aws-jenkins-access-key')
+                AWS_SECRET_ACCESS_KEY = credentials('aws-jenkins-secret')
+                AWS_DEFAULT_REGION = 'us-east-1'
+            }
+            steps {
+                sh '''
+                   aws cloudfront create-invalidation --distribution-id ABCD1234EF --paths "/*"
+                '''
+            }
+        }
+    }
+}
